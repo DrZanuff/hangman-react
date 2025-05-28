@@ -126,14 +126,6 @@ function App() {
         setHint((prev) => {
           const newHint = fillHintWordGuess(matches, prev)
 
-          console.log('WIN CHECK', {
-            hint,
-            GUESS_WORD,
-            dbg: {
-              hintJoin: hint.join(''),
-              guessJoin: GUESS_WORD.join(''),
-            },
-          })
           if (newHint.join('') === GUESS_WORD.join('')) {
             setGameState('win')
           }
