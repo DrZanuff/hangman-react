@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import './App.css'
 
 const MAX_TRIES = 6
@@ -70,7 +70,7 @@ function GameStateController({
       }}>
       {state === 'win' || state === 'lose' ? (
         <>
-          <h3>You ${state}!</h3>
+          <h3>You {state}!</h3>
           <button onClick={handleRestart}>Play Again?</button>
         </>
       ) : (
@@ -89,8 +89,12 @@ function App() {
     uniqueCharactersArray(GUESS_WORD)
   )
 
-  useEffect(() => {
-    function handleKeyDown(event: globalThis.KeyboardEvent) {
+  const handleKeyDown = useCallback(
+    (event: globalThis.KeyboardEvent) => {
+      if (gameState !== 'play') {
+        return
+      }
+
       const regex = /^[a-zA-Z0-9]$/
 
       const key = event.key
@@ -98,8 +102,7 @@ function App() {
       if (regex.test(key)) {
         if (!remainingChars.includes(key)) {
           setTries((prev) => uniqueCharactersArray([...prev, key]))
-          console.log({ tries, MAX_TRIES, check: tries.length >= MAX_TRIES })
-          if (tries.length >= MAX_TRIES) {
+          if (tries.length + 1 >= MAX_TRIES) {
             setGameState('lose')
           }
           return
@@ -121,31 +124,44 @@ function App() {
         })
 
         setHint((prev) => {
-          return fillHintWordGuess(matches, prev)
+          const newHint = fillHintWordGuess(matches, prev)
+
+          console.log('WIN CHECK', {
+            hint,
+            GUESS_WORD,
+            dbg: {
+              hintJoin: hint.join(''),
+              guessJoin: GUESS_WORD.join(''),
+            },
+          })
+          if (newHint.join('') === GUESS_WORD.join('')) {
+            setGameState('win')
+          }
+
+          return newHint
         })
 
         setKeyPressed(event.key)
-
-        if (hint.join('') === GUESS_WORD.join('')) {
-          setGameState('win')
-        }
       } else {
         setKeyPressed(null)
       }
-    }
+    },
+    [gameState, tries, hint]
+  )
 
+  useEffect(() => {
     document.addEventListener('keydown', handleKeyDown)
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [])
+  }, [handleKeyDown])
 
   const handleReset = () => {
     setGameState('play')
     setKeyPressed(null)
     setTries([])
-    setHint([])
+    setHint(fillHintWordArray(GUESS_WORD))
     setRemainingChars(uniqueCharactersArray(GUESS_WORD))
   }
 
