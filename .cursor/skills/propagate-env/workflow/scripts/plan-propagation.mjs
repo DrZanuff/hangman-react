@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { partitionTargets } from "./excluded-targets.mjs";
+
 function usage() {
   console.error(`Usage:
 plan-propagation.mjs --provider <github|gitlab|gitea> --host <host> --repo <repo-path> --target <branch> [--target <branch> ...] [options]
@@ -85,10 +87,16 @@ const args = readArgs(process.argv);
 const provider = requireArg(args, "provider");
 const host = trimSlashes(requireArg(args, "host"));
 const repo = trimSlashes(requireArg(args, "repo"));
-const targets = requireArg(args, "target");
+const requestedTargets = requireArg(args, "target");
+const { included: targets, excluded: excludedTargets } = partitionTargets(requestedTargets);
 const remote = args.remote || "origin";
 const prefix = args.prefix || "temp-";
 const changeName = args["change-name"] || "";
+
+if (targets.length === 0) {
+  console.error("No in-scope target branches remain after excluding main.");
+  process.exit(2);
+}
 
 if (!["github", "gitlab", "gitea"].includes(provider)) {
   console.error(`Unsupported provider: ${provider}`);
@@ -120,6 +128,7 @@ process.stdout.write(
       remote,
       prefix,
       changeName,
+      excludedTargets,
       plan
     },
     null,
