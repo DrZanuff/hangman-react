@@ -14,7 +14,9 @@ Use this workflow for requests like:
 - `propagate-env the current staged changes with prefix temp-TICKET-123-short-description`
 - `propagate-env commit abc1234 to the configured target branches`
 - `propagate-env set up this repo for branch propagation`
-- `propagate-env remember that this repo targets release/dev, customer/dev, and main`
+- `propagate-env remember that this repo targets release/dev, customer/dev, and env1`
 - `propagate-env clean up the temp branches from the PRs you just prepared`
 
 Core rule: each target branch must start from its own original branch or freshest safe remote-tracking ref. Never base one target branch's temporary branch on another target branch's temporary branch.
+
+Targets are environment, customer, or release branches. `main` is out of scope and must never be a propagation target.

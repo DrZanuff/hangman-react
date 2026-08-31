@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { partitionTargets } from "./excluded-targets.mjs";
 
 function usage() {
   console.error(`Usage:
@@ -86,8 +87,14 @@ const memoryPath = path.resolve(requireArg(args, "memory"));
 const repoKey = requireArg(args, "repo-key");
 const provider = requireArg(args, "provider");
 const remote = requireArg(args, "remote");
-const targets = requireArg(args, "target");
+const requestedTargets = requireArg(args, "target");
+const { included: targets, excluded: excludedTargets } = partitionTargets(requestedTargets);
 const tempPrefix = args["temp-prefix"] || "temp-";
+
+if (targets.length === 0) {
+  console.error("No in-scope target branches remain after excluding main.");
+  process.exit(2);
+}
 
 if (!["github", "gitlab", "gitea", "unknown"].includes(provider)) {
   console.error(`Invalid provider: ${provider}`);
@@ -144,6 +151,7 @@ process.stdout.write(
     {
       memoryPath,
       repoKey,
+      excludedTargets,
       saved: memory.repos[repoKey]
     },
     null,
