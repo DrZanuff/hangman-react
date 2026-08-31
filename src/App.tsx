@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import './App.css'
 
 const MAX_TRIES = 6
-const GUESS_WORD = ['b', 'a', 'n', 'a', 'n', 'a']
+const GUESS_WORD = ['a', 'p', 'p', 'l', 'e']
 
 type TMatch = {
   char: string
@@ -86,7 +86,7 @@ function App() {
   const [tries, setTries] = useState<string[]>([])
   const [hint, setHint] = useState(fillHintWordArray(GUESS_WORD))
   const [remainingChars, setRemainingChars] = useState<string[]>(
-    uniqueCharactersArray(GUESS_WORD)
+    uniqueCharactersArray(GUESS_WORD),
   )
 
   const handleKeyDown = useCallback(
@@ -138,7 +138,7 @@ function App() {
         setKeyPressed(null)
       }
     },
-    [gameState, tries, hint]
+    [gameState, tries, hint],
   )
 
   useEffect(() => {
