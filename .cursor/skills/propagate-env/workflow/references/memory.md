@@ -37,7 +37,7 @@ Ask before writing repo-local memory if the target branches, branch notes, or ve
 - `namespace`: full namespace before the repository name.
 - `owner`: first namespace segment.
 - `repoName`: repository name.
-- `targetBranches`: configured long-lived target branches.
+- `targetBranches`: configured long-lived environment, customer, or release branches. Never store `main`.
 - `tempPrefix`: default temporary branch prefix.
 - `branchNotes`: branch-specific warnings or operational notes.
 - `verificationHints`: optional commands or paths that help select verification.
@@ -62,7 +62,7 @@ Do not use a temporary branch name or task-specific ticket as the repo key.
 
 Ask before storing sensitive or private information in repo-local memory.
 
-Record facts the user explicitly gives, such as target branches and branch notes. Do not invent branch notes.
+Record facts the user explicitly gives, such as target branches and branch notes. Do not invent branch notes. Drop `main` from `targetBranches` before writing memory.
 
 When provider detection is uncertain and the user selects a provider, store that provider so future runs do not ask again.
 
@@ -91,7 +91,7 @@ When the user asks to remember or change repo-specific facts:
 
 Examples:
 
-- `propagate-env remember this repo targets release/dev and main`
+- `propagate-env remember this repo targets release/dev and env1`
 - `propagate-env change the temp prefix to temp-TICKET-456-`
 - `propagate-env remember that customer/dev needs customer-specific config checks`
 

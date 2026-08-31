@@ -11,7 +11,7 @@
       "namespace": "example-org",
       "owner": "example-org",
       "repoName": "example-repo",
-      "targetBranches": ["release/dev", "customer/dev", "main"],
+      "targetBranches": ["release/dev", "customer/dev", "env1"],
       "tempPrefix": "temp-",
       "branchNotes": {
         "release/dev": "Preserve release-only configuration.",
