@@ -7,7 +7,7 @@ Example invocations:
 - `propagate-env the current staged changes with prefix temp-TICKET-123-short-description`
 - `propagate-env commit abc1234 to the configured target branches`
 - `propagate-env set up this repo for branch propagation`
-- `propagate-env remember that this repo targets release/dev, customer/dev, and main`
+- `propagate-env remember that this repo targets release/dev, customer/dev, and env1`
 - `propagate-env clean up the temp branches from the PRs you just prepared`
 
 The exact invocation syntax depends on the host environment. It may be a mention, slash command, workflow picker, skill name, or plain text. Treat the workflow name and task details as the important signal.
@@ -20,13 +20,20 @@ Good:
 
 - Create `temp-release-dev-ticket-123` from `origin/release/dev`.
 - Create `temp-customer-dev-ticket-123` from `origin/customer/dev`.
-- Create `temp-main-ticket-123` from `origin/main`.
+- Create `temp-env1-ticket-123` from `origin/env1`.
 
 Unsafe:
 
 - Create the second temporary branch from the first temporary branch.
 - Use a prepared branch as the source base for another target branch.
 - Carry branch-specific files from one target branch into another target branch.
+- Use `main` as a target branch.
+
+## Target Scope
+
+Targets are long-lived environment, customer, or release branches from memory or the user.
+
+`main` is out of scope. Drop it from memory, plans, temp branches, and PRs, then continue with the remaining targets. If the user names `main` as a target, say it was excluded. If no in-scope targets remain, ask for environment, customer, or release branches before mutating Git state.
 
 ## Inputs To Resolve
 
@@ -62,7 +69,7 @@ Read [workflow/references/memory.md](references/memory.md) when the user asks to
 Memory interaction examples:
 
 - `propagate-env what do you remember for this repo?`
-- `propagate-env update this repo to target release/dev and main`
+- `propagate-env update this repo to target release/dev and env1`
 - `propagate-env remember customer/dev needs customer-specific config checks`
 - `propagate-env forget the memory for this repo`
 
@@ -74,8 +81,8 @@ Setup examples:
 
 - `propagate-env set up this repo for branch propagation`
 - `propagate-env configure this repository`
-- `propagate-env remember that this repo targets release/dev, customer/dev, and main`
-- `propagate-env this repo is GitLab and targets release/dev and main`
+- `propagate-env remember that this repo targets release/dev, customer/dev, and env1`
+- `propagate-env this repo is GitLab and targets release/dev and env1`
 - `propagate-env for customer/dev, remember to preserve customer-specific config`
 
 When setup is triggered:
@@ -92,8 +99,8 @@ When setup is triggered:
    - Use: `I cannot confidently identify this Git host. Is this repository hosted on GitHub, GitLab, or Gitea?`
    - Completion criterion: the user answered, or setup is paused waiting for that answer.
 5. Ask for target branches when they are not already known from memory or the user request.
-   - Use: `Which target branches should propagate-env remember for this repo?`
-   - Completion criterion: at least one target branch is known.
+   - Use: `Which environment, customer, or release branches should propagate-env remember for this repo?`
+   - Drop `main` if it appears. Completion criterion: at least one in-scope target branch is known.
 6. Ask for branch-specific notes when useful.
    - Use: `Any branch-specific notes I should remember, such as config, release, customer, or verification differences? You can say "none."`
    - Completion criterion: notes were recorded or the user said there are none.
@@ -135,8 +142,9 @@ When propagation is triggered:
    - Completion criterion: current branch, dirty state, remotes, and local branch tracking state are known.
 3. Resolve provider, remote, target branches, temp prefix, branch notes, and verification hints from memory or user input.
    - Ask for target branches when memory does not provide them.
+   - Drop `main` from the target list. Do not create a temp branch or PR for it.
    - Ask for provider when detection is uncertain.
-   - Completion criterion: every required input is known before branches are created.
+   - Completion criterion: every required input is known before branches are created, and no target is `main`.
 4. Fetch remote refs when credentials and network access allow it.
    - If fetch fails, continue only with existing local refs and record that limitation.
 5. Plan the per-target work.
@@ -182,7 +190,7 @@ Examples:
 ```text
 temp-TICKET-123-release-dev-fix-auth-timeout
 temp-TICKET-123-customer-dev-fix-auth-timeout
-temp-TICKET-123-main-fix-auth-timeout
+temp-TICKET-123-env1-fix-auth-timeout
 ```
 
 Avoid `/` in temporary source branch names unless the provider URL rules have been verified for encoded source branches.
@@ -249,6 +257,7 @@ Notes: <only include important branch-specific notes, failures, or cleanup promp
 Before finishing, confirm internally:
 
 - Every temporary branch starts from its matching target branch.
+- No target is `main`.
 - No temporary branch is based on another temporary branch.
 - Intended files are committed.
 - Unrelated dirty files were not committed.
